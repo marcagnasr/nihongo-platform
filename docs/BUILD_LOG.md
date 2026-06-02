@@ -113,8 +113,47 @@ this file becomes the seed data with minimal reshaping.
 
 **Verified:** `npx tsc --noEmit` passes (no type errors).
 
-### Step 3 — Components (pending)
-Navbar, Modal, Toast, LessonCard, ProgressBar, FilterBar, QuizOverlay.
+### Step 3 — Components (done)
+
+**Goal:** the reusable React building blocks the screens assemble from.
+
+**Big idea — "call from anywhere" without globals.** The prototype called
+`Modal.open()` and `showToast()` as global functions. The React-idiomatic
+replacement is **Context Providers + hooks**, mounted once in `app/layout.tsx`:
+
+```
+<ToastProvider>      ← exposes useToast()  → showToast(msg)
+  <ModalProvider>    ← exposes useModal()  → openModal("login" | "signup")
+    <Navbar />
+    {children}       ← every page
+```
+
+Toast wraps Modal because the modal fires a toast when you submit. Any
+component under the tree can now call `useToast()` / `useModal()`.
+
+**Components (in `components/`):**
+
+| File | Type | Notes |
+|------|------|-------|
+| `Toast.tsx` | provider + `useToast` | single toast, auto-hides after 2.8s, re-fire resets the timer. |
+| `Modal.tsx` | provider + `useModal` | login/signup forms (cosmetic in Phase 1). Submit → route to `/dashboard` + toast. ESC and backdrop-click close. **Phase 2 swaps only the submit handler.** |
+| `Navbar.tsx` | client | active link from `usePathname()` (URL is the source of truth, not a store). Uses `<Link>` for real prefetched navigation. |
+| `ProgressBar.tsx` | **server** | pure presentational; `value` + `fill` + `mini`. The only non-client component here. |
+| `LessonCard.tsx` | client | presentational tile; reports clicks via `onSelect` so the **parent** decides locked→modal vs free→navigate. |
+| `FilterBar.tsx` | client | generic over the option type; parent owns the active value (no internal state). |
+| `QuizOverlay.tsx` | client | the in-video quiz interaction (pick → lock → feedback → continue). Parent decides *when* to show it. |
+
+**Decisions worth remembering:**
+- **Presentational where possible.** `LessonCard`/`FilterBar`/`QuizOverlay`/`ProgressBar`
+  hold little or no state and take callbacks/props — so they're reusable and the
+  page that uses them owns the behaviour. That's the separation we want.
+- **`<Link>` not `<button>` for nav** — proper navigation + prefetch + a11y.
+  Updated the `.nav-links` CSS to target `a` as well as `button`.
+- **State reset in `QuizOverlay`** uses React's "adjust state during render"
+  pattern (compare prev prop), not a `useEffect` — ESLint flagged the effect
+  version as a cascading-render anti-pattern.
+
+**Verified:** `npm run build` (compile + types) and `npm run lint` both pass.
 
 ### Step 4 — Pages (pending)
 Home, Browse (`/lessons`), Player, Dashboard, Admin.

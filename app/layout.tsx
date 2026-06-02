@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Shippori_Mincho, DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
+import { ToastProvider } from "@/components/Toast";
+import { ModalProvider } from "@/components/Modal";
+import Navbar from "@/components/Navbar";
 
 // ── Fonts ──────────────────────────────────────────────────────────
 // Loaded via next/font/google: self-hosted, no layout shift, no runtime
@@ -46,7 +49,16 @@ export default function RootLayout({
       lang="en"
       className={`${shippori.variable} ${dmSans.variable} ${dmMono.variable} antialiased`}
     >
-      <body>{children}</body>
+      <body>
+        {/* Providers expose useToast()/useModal() to the whole app.
+            Toast must wrap Modal because the modal shows toasts on submit. */}
+        <ToastProvider>
+          <ModalProvider>
+            <Navbar />
+            {children}
+          </ModalProvider>
+        </ToastProvider>
+      </body>
     </html>
   );
 }

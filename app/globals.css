@@ -165,15 +165,17 @@ nav {
 .nav-logo span { color: var(--red); }
 
 .nav-links { display: flex; align-items: center; gap: 6px; }
-.nav-links button {
+/* Targets both <button> (prototype) and <a> (Next.js <Link>) nav items. */
+.nav-links button, .nav-links a {
   background: none; border: none;
   font-family: var(--font-dm-sans);
   font-size: 14px; color: var(--muted);
   padding: 6px 12px; border-radius: 6px;
   cursor: pointer; transition: all 0.15s; font-weight: 500;
+  text-decoration: none;
 }
-.nav-links button:hover  { background: var(--paper2); color: var(--ink); }
-.nav-links button.active { color: var(--ink); font-weight: 600; }
+.nav-links button:hover,  .nav-links a:hover  { background: var(--paper2); color: var(--ink); }
+.nav-links button.active, .nav-links a.active { color: var(--ink); font-weight: 600; }
 
 /* ───────────────────────────────────────────────────────────────────
    HOME SCREEN
