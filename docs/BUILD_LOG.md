@@ -155,8 +155,39 @@ component under the tree can now call `useToast()` / `useModal()`.
 
 **Verified:** `npm run build` (compile + types) and `npm run lint` both pass.
 
-### Step 4 — Pages (pending)
-Home, Browse (`/lessons`), Player, Dashboard, Admin.
+### Step 4 — Pages (done)
+
+**Goal:** assemble the components + data into the five real screens.
+
+| Route | File | Notes |
+|-------|------|-------|
+| `/` | `app/page.tsx` | Home: hero, features, pricing. Replaced the placeholder. |
+| `/lessons` | `app/lessons/page.tsx` | Browse: FilterBar + LessonCards grouped by topic via `lessonsByTopic()`. |
+| `/player` | `app/player/page.tsx` | Simulated video + QuizOverlay orchestration. |
+| `/dashboard` | `app/dashboard/page.tsx` | Hardcoded stats (real data in Phase 5); reuses ProgressBar. |
+| `/admin` | `app/admin/page.tsx` | Lesson table with live search + quiz-editor placeholder. |
+
+**Decision — why these are Client Components.** Each screen is genuinely
+interactive (filter state, the video timer, modal triggers, live search). In
+Phase 2/5, the pattern flips: the page becomes a Server Component that fetches
+data and passes it to a small interactive client child. That's an extraction,
+not a rewrite — the markup stays.
+
+**The tricky one — Player.** The fake video is a `setInterval` that advances
+1 second per 200ms tick. A naive version breaks because the interval callback
+"closes over" stale state. Fix: the authoritative values (progress, current
+quiz index, playing) live in **refs** that the timer reads live; React state
+just mirrors them so the UI re-renders. When the playhead reaches a quiz's
+timestamp it pauses and shows `<QuizOverlay>`; "Continue" advances past the
+trigger and resumes. Spacebar toggles play/pause (bound once, reads refs).
+
+**The React way to do live search (Admin).** The prototype hid table rows by
+setting `row.style.display` directly. Here, search is state and we render only
+the rows whose title matches — no manual DOM manipulation.
+
+**Verified:** lint + build pass; dev server returns HTTP 200 for all five
+routes with no runtime errors.
 
 ### Step 5 — Deploy to Vercel (pending)
-Needs the Vercel account.
+Needs the Vercel account. This is the only Phase 1 step that requires you to do
+something (create the account + connect the repo).
